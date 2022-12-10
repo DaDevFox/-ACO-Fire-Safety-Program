@@ -1,7 +1,16 @@
+using BuildingSafetyACO.Simulation;
+
 namespace BuildingSafetyACO
 {
-    internal static class Program
+    public static class ApplicaitonCore
     {
+        public static SimulationFrame Simulation { get; set; } = new SimulationFrame();
+
+
+
+
+
+
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -11,7 +20,7 @@ namespace BuildingSafetyACO
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new MainApplication());
         }
     }
 }
