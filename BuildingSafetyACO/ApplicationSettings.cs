@@ -16,15 +16,12 @@ namespace BuildingSafetyACO
 
         };
 
-        
-
-
-
-
-
 
         public class Controls
         {
+            public Keys SimulationRun = Keys.Space;
+            public Keys SimulationHalt = Keys.Back;
+            
             public MouseButtons UISelect = MouseButtons.Left;
             public MouseButtons UIContextMenu = MouseButtons.Right;
 

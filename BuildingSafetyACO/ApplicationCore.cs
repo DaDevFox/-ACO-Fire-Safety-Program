@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace BuildingSafetyACO
 {
-    public static class ApplicaitonCore
+    public static class ApplictionCore
     {
         public static SimulationFrame Simulation { get; set; } = new SimulationFrame();
 
