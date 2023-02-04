@@ -1,4 +1,5 @@
 using BuildingSafetyACO.Simulation;
+using System.Diagnostics;
 
 namespace BuildingSafetyACO
 {
@@ -21,6 +22,9 @@ namespace BuildingSafetyACO
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new MainApplication());
+
+            Debug.WriteLine("Starting");
+            Simulation.Initialize();
         }
     }
 }
