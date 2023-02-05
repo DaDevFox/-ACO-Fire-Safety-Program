@@ -107,7 +107,7 @@ namespace BuildingSafetyACO.Data
                 foreach(FieldInfo field in instanceType.GetFields())
                     if(!field.IsStatic && !field.IsPrivate)
                         if (source.GetValue(field.Name) != null)
-                            field.SetValue(instance, source.GetValue(field.Name));
+                            field.SetValue(instance, source.GetValue(field.Name).Value());
 
                 return instance;
             }
