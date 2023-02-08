@@ -7,6 +7,18 @@ using UnityEngine;
 //#endif
 public class PathingGraph : MonoBehaviour
 {
+    public enum Direction
+    {
+        North,
+        East,
+        South,
+        West,
+        Northeast,
+        Southeast,
+        Southwest,
+        Northwest
+    }
+
     [Header("Settings")]
     public Pathfinder pathfinder;
     public Vector2 dimensions;
@@ -20,6 +32,29 @@ public class PathingGraph : MonoBehaviour
 
 
     private Dictionary<Vector3, bool> nodes = new Dictionary<Vector3, bool>();
+
+    private Dictionary<Direction, Vector3> directionVectors = new Dictionary<Direction, Vector3>()
+    {
+        { Direction.North, new Vector3(0, 0, -1)},
+        { Direction.East, new Vector3(1, 0, 0)},
+        { Direction.South, new Vector3(0, 0, 1)},
+        { Direction.West, new Vector3(-1, 0, 0)},
+        { Direction.Northeast, new Vector3(1, 0, -1)},
+        { Direction.Southeast, new Vector3(1, 0, 1)},
+        { Direction.Southwest, new Vector3(-1, 0, 1)},
+        { Direction.Northwest, new Vector3(-1, 0, -1)}
+    };
+
+    public Vector3[] GetNeighbors(Vector3 node)
+    {
+        List<Vector3> neighbors = new List<Vector3>();
+        foreach(Vector3 delta in directionVectors.Values)
+        {
+            if (Node(node + delta))
+                neighbors.Add(node + delta);
+        }
+        return (Vector3[])neighbors.ToArray();
+    }
 
     public bool Node(Vector3 position) => nodes.ContainsKey(position) ? nodes[position] : false;
 
@@ -76,7 +111,7 @@ public class PathingGraph : MonoBehaviour
             pathfinder.start = pathfinderStart.transform.position;
             pathfinder.end = pathfinderEnd.transform.position;
 
-            //if (Input.GetKeyDown(KeyCode.P))
+            if (Input.GetKeyDown(KeyCode.P))
                 pathfinder.Path();
         }
     }
