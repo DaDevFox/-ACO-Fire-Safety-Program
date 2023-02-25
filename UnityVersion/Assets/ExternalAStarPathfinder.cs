@@ -66,10 +66,10 @@ public class ExternalAStarPathfinder : Pathfinder
     private Node[,] grid;
     private bool initialized = false;
 
-    private void Start()
-    {
-        Initialize();
-    }
+    //private void Start()
+    //{
+    //    Initialize();
+    //}
 
     private void Initialize(bool force = false)
     {
@@ -91,7 +91,6 @@ public class ExternalAStarPathfinder : Pathfinder
                 if (graph.Node(new Vector3(x, 0f, z)))
                 {
                     context.node.walkable = true;
-                    Debug.Log($"{xInt}, {zInt}");
                 }
             }
         }

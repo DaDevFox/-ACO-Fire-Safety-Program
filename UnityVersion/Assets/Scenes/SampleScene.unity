@@ -312,6 +312,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41fcbad8ef7bf5b4d9a27f3f097bc66b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  start: {x: 0, y: 0, z: 0}
+  end: {x: 0, y: 0, z: 0}
+  graph: {fileID: 0}
+  result: []
+  agentCount: 30
+  startPheremone: 0.1
+  iterations: 1000
+  displayingAnt: 0
+  displayStandardPheremone: 0
+  displayGuidingPheremone: 0
 --- !u!4 &207876701
 Transform:
   m_ObjectHideFlags: 0
@@ -777,7 +787,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &705507994
 Light:
   m_ObjectHideFlags: 0
@@ -986,7 +996,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 789059533}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.25, y: 1, z: -12.25}
+  m_LocalPosition: {x: -5.5, y: 1, z: 3.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1070,7 +1080,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 20, z: 0}
+  m_LocalPosition: {x: 0, y: 20, z: 6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1106,7 +1116,7 @@ Transform:
   m_GameObject: {fileID: 1210348998}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5, y: 0.5, z: 11.5}
-  m_LocalScale: {x: 1, y: 1, z: 9}
+  m_LocalScale: {x: 1, y: 1, z: 2.16}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 748685560}
@@ -1825,7 +1835,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1887210256}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6, y: 0, z: 15.25}
+  m_LocalPosition: {x: 3.5, y: 0, z: 4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1992,7 +2002,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7016a088a7294f4438ed96f13770a8a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pathfinder: {fileID: 154178853}
+  pathfinder: {fileID: 207876700}
   dimensions: {x: 50, y: 50}
   resultHoverOffset: {x: 0, y: 0, z: 0}
   pathfinderStart: {fileID: 1887210256}

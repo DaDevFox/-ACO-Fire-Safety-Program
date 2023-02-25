@@ -7,24 +7,62 @@ using UnityEngine;
 
 public class Ant
 {
-    public Mesh mesh = ((GameObject)Resources.Load("Ant.prefab")).GetComponent<MeshFilter>().mesh;
-    public Material material = ((GameObject)Resources.Load("Ant.prefab")).GetComponent<MeshRenderer>().material;
+    private class VectorComparer : IComparer<Vector3>
+    {
+        private AntSystem system;
+        public VectorComparer(AntSystem system)
+        {
+            this.system = system;
+        }
+
+        public int Compare(Vector3 x, Vector3 y) => Ant.CompareVectors(x, y);
+    }
+
+    //public static Mesh mesh = ((GameObject)Resources.Load("Ant")).GetComponent<MeshFilter>().sharedMesh;
+    //public static Material material = ((GameObject)Resources.Load("Ant")).GetComponent<MeshRenderer>().sharedMaterial;
 
     public Vector3 position;
     /// <summary>
     /// does not include current position
     /// </summary>
-    public List<Vector3> visited;
-    public Vector3[] currentNeighbors;
+    public List<Vector3> visited = new List<Vector3>();
+    private int currentNeighborsLength = 9;
+    public Vector3[] currentNeighbors = new Vector3[9];
 
-    public static float guidingPheremoneCoefficient = 1f;
-    public static float standardPheremoneCoefficient = 0.5f;
+    public static float guidingPheremoneCoefficient = 2000000f;
+    public static float standardPheremoneCoefficient = 0.1f;
+
+    public static float baseStandardPheremone = 0.1f;
+    public static float guidingPheremonePerPath = 1000f;
 
     public Vector3[] path;
 
+    private float[] probabilities = new float[9];
+
+    private VectorComparer comparer;
+
+    public Ant()
+    {
+        comparer = new VectorComparer(AntSystem.main);
+    }
+
+    private static int CompareVectors(Vector3 a, Vector3 b)
+    {
+        float dimensionsX = AntSystem.main.graph.dimensions.x * 0.5f;
+        float dimensionsY = AntSystem.main.graph.dimensions.y * 0.5f;
+        a.x += dimensionsX;
+        a.z += dimensionsY;
+        b.x += dimensionsX;
+        b.z += dimensionsY;
+
+        return ((int)a.x + (int)(2f * dimensionsX * (int)a.z)) 
+            - 
+            ((int)b.x + (int)(2f * dimensionsX * (int)b.z));
+    }
+
     public void Iterate()
     {
-        if(path != null)
+        if(path == null)
         {
             // set new pos
             int newNeighbor = ChooseNewNeighbor();
@@ -32,44 +70,84 @@ public class Ant
             {
                 if (visited.Count > 0)
                 {
-                    AntSystem.DepositStandardPheremone(position, 1f / (position - visited[visited.Count - 1]).sqrMagnitude);
+                    AntSystem.DepositStandardPheremone(position, baseStandardPheremone);
                 }
 
-                visited.Add(position);
+                visited.InsertIntoSortedList(position, CompareVectors);
                 position = currentNeighbors[newNeighbor];
-                currentNeighbors = AntSystem.GetNeighbors(position);
+                Vector3[] newNeighbors = AntSystem.main.graph.GetNeighbors(position, out int count);
+
+                currentNeighborsLength = count;
+                for(int i = 0; i < currentNeighborsLength; i++)
+                {
+                    currentNeighbors[i] = newNeighbors[i];
+                }
             }
 
             // check for end condition
-            if(position == AntSystem.main.end)
+            if (position == new Vector3((int)AntSystem.main.end.x, 0f, (int)AntSystem.main.end.z))
             {
-                Debug.Log("This is the end");
+                path = new Vector3[visited.Count];
+                path[0] = visited[0];
+                float pheremoneAmount = guidingPheremonePerPath;
+                
+                for(int i = 1; i < visited.Count; i++) 
+                {
+                    path[i] = visited[i];
+                    AntSystem.DepositGuidingPheremone(visited[i], pheremoneAmount);
+                }
             }
         }
     }
 
-    public void Draw()
+    private bool Visited(Vector3 location)
     {
-        Graphics.DrawMesh(mesh, position, Quaternion.identity, material, 0);
+        for(int i = 0; i < visited.Count; i++)
+        {
+            if ((int)location.x == (int)visited[i].x && (int)location.z == (int)visited[i].z)
+                return true;
+        }
+        return false;
     }
+
+    private int[] searchResults = new int[9];
 
     public int ChooseNewNeighbor()
     {
-        float totalPheremone = currentNeighbors.Sum((neighbor) => AntSystem.GuidingPheremone(neighbor) + AntSystem.StandardPheremone(neighbor));
-        float[] probabilities = new float[currentNeighbors.Length];
+        int chosen = -1;
 
-        foreach (Vector3 neighbor in currentNeighbors)
+        float totalPheremone = 0f;
+        for(int i = 0; i < currentNeighborsLength; i++)
         {
-            float pheremone = AntSystem.GuidingPheremone(neighbor) + AntSystem.StandardPheremone(neighbor);
-            float probability = pheremone / totalPheremone;
+            searchResults[i] = visited.BinarySearch(currentNeighbors[i], comparer);
+            if (searchResults[i] < 0)
+                totalPheremone += AntSystem.GuidingPheremone(currentNeighbors[i]) * guidingPheremoneCoefficient + AntSystem.StandardPheremone(currentNeighbors[i]) * standardPheremoneCoefficient;
+        }
+
+        for(int i = 0; i < currentNeighborsLength; i++)
+        {
+            if (searchResults[i] < 0)
+            {
+                float pheremone = AntSystem.GuidingPheremone(currentNeighbors[i]) * guidingPheremoneCoefficient + AntSystem.StandardPheremone(currentNeighbors[i]) * standardPheremoneCoefficient;
+
+                if (currentNeighbors[i] == new Vector3((int)AntSystem.main.end.x, 0f, (int)AntSystem.main.end.z))
+                {
+                    chosen = i;
+                    break;
+                }
+
+                float probability = pheremone / totalPheremone;
+                probabilities[i] = probability;
+            }
+            else
+                probabilities[i] = 0f;
         }
 
         float random = UnityEngine.Random.Range(0f, 1f);
         float sum = 0f;
-        int chosen = -1;
-        for (int i = 0; i < probabilities.Length; i++)
+        for (int i = 0; i < currentNeighborsLength; i++)
         {
-            if (random > sum && random < probabilities[i])
+            if (random > sum && random < sum + probabilities[i])
             {
                 chosen = i;
                 break;

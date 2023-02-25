@@ -1,6 +1,10 @@
+using System;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.VisualScripting;
+using UnityEngine.Profiling;
 //#if UNITY_EDITOR
 
 //[ExecuteInEditMode]
@@ -45,21 +49,31 @@ public class PathingGraph : MonoBehaviour
         { Direction.Northwest, new Vector3(-1, 0, -1)}
     };
 
-    public Vector3[] GetNeighbors(Vector3 node)
+    private Vector3[] neighbors = new Vector3[9];
+
+    public Vector3[] GetNeighbors(Vector3 node, out int count)
     {
-        List<Vector3> neighbors = new List<Vector3>();
+        node = new Vector3((int)node.x, 0f, (int)node.z);
+
+        count = 0;
         foreach(Vector3 delta in directionVectors.Values)
         {
-            if (Node(node + delta))
-                neighbors.Add(node + delta);
+            Vector3 test = node + delta;
+            if (Node(test))
+            {
+                neighbors[count] = test;
+                count++;
+            }
         }
-        return (Vector3[])neighbors.ToArray();
+        return neighbors;
     }
 
     public bool Node(Vector3 position) => nodes.ContainsKey(position) ? nodes[position] : false;
 
     private void Start()
     {
+        //Profiler.enableAllocationCallstacks = true;
+
         BakeObstacles();
         Remap();
 
@@ -106,17 +120,26 @@ public class PathingGraph : MonoBehaviour
 
     public void Update()
     {
-        if (pathfinderStart && pathfinderEnd)
-        {
-            pathfinder.start = pathfinderStart.transform.position;
-            pathfinder.end = pathfinderEnd.transform.position;
-
+        //if (pathfinderStart && pathfinderEnd)
+        //{
+            
             if (Input.GetKeyDown(KeyCode.P))
+            {
+                pathfinder.start = pathfinderStart.transform.position;
+                pathfinder.end = pathfinderEnd.transform.position;
+
+
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
                 pathfinder.Path();
-        }
+                timer.Stop();
+
+                UnityEngine.Debug.Log($"{pathfinder.GetType().Name} completed pathing operation in {timer.ElapsedMilliseconds} ms");
+            }
+        //}
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawCube(Vector3.zero, Vector3.one);
@@ -128,13 +151,24 @@ public class PathingGraph : MonoBehaviour
 
         if(pathfinder.result != null && pathfinder.result.Length > 0)
         {
-            for(int i = 0; i < pathfinder.result.Length; i++)
+            Color color = Color.green;
+            color.a = 1f;
+            Gizmos.color = color;
+
+            for (int i = 0; i < pathfinder.result.Length; i++)
             {
-                Color color = Color.green;
-                color.a = 1f;
-                Gizmos.color = color;
                 Gizmos.DrawCube(pathfinder.result[i] + resultHoverOffset, Vector3.one * 0.2f);
             }
         }
+
+        if (pathfinder is AntSystem antSystem)
+        {
+            Gizmos.color = Color.black;
+            foreach(Ant ant in antSystem.ants)
+            {
+                Gizmos.DrawCube(ant.position, Vector3.one * 0.3f);
+            }
+        }
+
     }
 }
